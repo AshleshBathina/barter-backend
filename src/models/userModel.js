@@ -5,22 +5,28 @@ const userSchema = new Schema({
   firstName: {
     required: true,
     type: String,
-    minlength: 3
+    trim: true,
+    minLength: 2,
+    maxLength: 50
   },
   lastName: {
     type: String,
+    trim: true,
+    maxLength: 50
+  },
+  username: {
+    type: String,
     required: true,
+    unique: true,
+    lowercase: true,
+    match: /^[a-zA-Z0-9]{3-20}$/,
+    minLength: 3,
+    maxLength: 20,
+    trim: true
   },
   password: {
     type: String,
     required: true
-  },
-  phoneNumber: {
-    type: String,
-    trim: true,
-    sparse: true,
-    unique: true,
-    match: /^[6-9][0-9]{9}$/
   },
   email: {
     unique: true,
@@ -35,14 +41,8 @@ const userSchema = new Schema({
     default: null,
     trim: true
   },
-  
-}, {timestamps: true})
 
-userSchema.pre("validate", function next() {
-  if(!this.phoneNumber && !this.email){
-    return next(new Error("Either email or phone number is required."))
-  }
-})
+}, { timestamps: true })
 
 const userModel = mongoose.model('User', userSchema);
 
