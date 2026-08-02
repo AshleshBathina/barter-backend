@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
 
-const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
   firstName: {
     required: true,
     type: String,
@@ -19,7 +18,7 @@ const userSchema = new Schema({
     required: true,
     unique: true,
     lowercase: true,
-    match: /^[a-zA-Z0-9]{3-20}$/,
+    match: /^[a-zA-Z0-9]{3,20}$/,
     minLength: 3,
     maxLength: 20,
     trim: true
