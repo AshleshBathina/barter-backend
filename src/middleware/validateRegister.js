@@ -8,7 +8,7 @@ const validateRegister = (req, res, next) => {
   if (username) {
     const len = username.length;
 
-    const usernameRegex = /^[a-z0-9]{3-20}$/
+    const usernameRegex = /^[a-z0-9]{3,20}$/
 
     if (len < 3 || len > 20 && !usernameRegex.test(username)) {
 

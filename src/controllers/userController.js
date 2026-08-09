@@ -2,7 +2,7 @@ import User from "../models/userModel.js";
 
 export const isUsernameTaken = async (req, res) => {
   try {
-    const username = req.query?.username?.trim()?.toLowerCase();
+    const username = req.query.username;
 
     if (!username) {
       return res.status(400).json({
@@ -16,15 +16,21 @@ export const isUsernameTaken = async (req, res) => {
     if (user) {
       return res.status(200).json({
         success: true,
-        available: false,
+        data: {
+          available: false,
+          username,
+        },
         message: "Username already exists"
       })
     }
 
     return res.status(200).json({
       success: true,
-      available: true,
-      message: "Username not found"
+      data: {
+        available: true,
+        username,
+      },
+      message: "Username available"
     })
   } catch (err) {
     console.error("Server error: ", err)
