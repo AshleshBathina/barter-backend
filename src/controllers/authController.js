@@ -31,6 +31,8 @@ export const register = async (req, res) => {
 
     const user = await User.create(userData);
 
+    console.log("User registered successfully:", user);
+
     const payload = {
       username: user.username,
       firstName: user.firstName,
