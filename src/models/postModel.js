@@ -6,6 +6,11 @@ const postschema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  type: {
+    type: String,
+    enum: ["offline", "online"],
+    required: true
+  },
   description: {
     type: String,
     trim: true
@@ -14,16 +19,19 @@ const postschema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  rating: {
-    type: Number,
-    min: 0,
-    max: 5,
-    default: 0
+  location: {
+    type: "Point",
+    coordinates: {
+      type: [Number]
+    }
   },
   images: [String],
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
+  },
+  views: {
+    type: Number
   }
 });
 

@@ -34,6 +34,7 @@ export const register = async (req, res) => {
     console.log("User registered successfully:", user);
 
     const payload = {
+      _id: user._id,
       username: user.username,
       firstName: user.firstName,
       ...(user.lastName && { lastName: user.lastName }),
@@ -80,6 +81,7 @@ export const login = async (req, res) => {
     }
 
     const payload = {
+      _id: user._id,
       username: user.username,
       firstName: user.firstName,
       ...(user.lastName && { lastName: user.lastName }),

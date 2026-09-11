@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import "../configs/env.js";
 
-const verifyJWT = (req, res, next) => {
+const authenticate = (req, res, next) => {
   const token = req?.headers?.authorization?.split(' ')[1];
 
   if (!token) {
@@ -21,4 +21,4 @@ const verifyJWT = (req, res, next) => {
 
 }
 
-export default verifyJWT;
+export default authenticate;

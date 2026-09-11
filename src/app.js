@@ -12,6 +12,7 @@ app.use(cors())
 
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
+app.use('/post', postRouter);
 
 app.get('/health', async (req, res) => {
   try {
