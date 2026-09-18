@@ -6,3 +6,5 @@ import authenticate from "../middleware/authMiddleware.js";
 const router = express()
 
 router.post('/', authenticate, upload.array('images', 5), createPost);
+
+export default router;

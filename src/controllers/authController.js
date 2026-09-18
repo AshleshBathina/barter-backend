@@ -41,11 +41,13 @@ export const register = async (req, res) => {
       email: user.email,
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    console.log("JWT Token generated successfully:", jwtToken);
 
     return res.status(201).json({
       success: true,
-      jwtToken: token,
+      jwtToken,
       user: payload
     });
   } catch (err) {
@@ -89,6 +91,7 @@ export const login = async (req, res) => {
     };
 
     const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+    console.log("JWT Token generated successfully:", jwtToken);
 
     return res.status(200).json({
       success: true,
@@ -97,6 +100,7 @@ export const login = async (req, res) => {
       user: payload
     });
   } catch (err) {
+    console.log("Error in login: ", err);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error"

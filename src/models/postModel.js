@@ -20,10 +20,13 @@ const postschema = new mongoose.Schema({
     trim: true
   },
   location: {
-    type: "Point",
+    type: {
+      type: String,
+      enum: ["Point"],
+    },
     coordinates: {
-      type: [Number]
-    }
+      type: [Number],
+    },
   },
   images: [String],
   author: {
@@ -34,6 +37,8 @@ const postschema = new mongoose.Schema({
     type: Number
   }
 });
+
+postschema.index({ location: "2dsphere" });
 
 const postModel = mongoose.model("Post", postschema);
 
