@@ -1,6 +1,6 @@
 import Post from "../models/postModel.js"
-import cloudinary from "../configs/cloudinary.js"
-import fs from "fs/promises"
+import { uploadImages, deleteImages } from "../services/imageService.js"
+import { validateCoordinates } from "../utils/validateCoordinates.js"
 
 export const createPost = async (req, res) => {
   try{
@@ -44,38 +44,14 @@ export const createPost = async (req, res) => {
       })
     }
 
-    if(
-      hasLocation &&
-      (!Number.isFinite(lon) ||
-       !Number.isFinite(lat) || 
-       lon < -180 || 
-       lon > 180 || 
-       lat < -90 || 
-       lat > 90
-      )
-    ) {
+    if(hasLocation && !validateCoordinates(lat, lon)) {
       return res.status(400).json({
         success: false,
         message: "Invalid location coordinates."
       })
     }
 
-    const uploadedUrls = [];
-    for(let file of req.files){
-      try{
-        const result = await cloudinary.uploader.upload(file.path);
-      
-        uploadedUrls.push(result.secure_url);
-      } catch(err){
-        console.log("Error in createPost: ", err)
-        return res.status(500).json({
-          success: false,
-          message: "Internal server error"
-        })
-      } finally{
-        await fs.unlink(file.path);
-      }
-    }
+    const uploadedUrls = await uploadImages(req.files);
 
     const postData = {
       title,
@@ -109,7 +85,89 @@ export const createPost = async (req, res) => {
   }
 }
 
-export const updatePost = async (req, res) => {}
+export const updatePost = async (req, res) => {
+  try{
+    const { id } = req.params;
+    const { title, type, description, inExchangeFor, longitude, latitude} = req.body;
+
+    const keptImageIds = JSON.parse(req.body.keptImageIds || "[]");
+
+    const post = await Post.findOne({
+      _id: id,
+      author: req.user._id
+    });
+
+    if(!post){
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      });
+    }
+
+    if((keptImageIds?.length || 0) + (req.files?.length || 0) > 5){
+      return res.status(400).json({
+        success: false,
+        message: "Images limit per post is 5"
+      });
+    }
+
+    if(title){
+      post.title = title;
+    }
+
+    if(type){
+      post.type = type;
+    }
+
+    if(description){
+      post.description = description;
+    }
+
+    if(inExchangeFor){
+      post.inExchangeFor = inExchangeFor;
+    }
+
+    if(longitude != undefined && latitude != undefined){
+      if(validateCoordinates(Number(latitude), Number(longitude))){
+        post.location = {
+          type: "Point",
+          coordinates: [Number(longitude), Number(latitude)]
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid location coordinates."
+        });
+      }
+    }
+
+    const imagesToDelete = post.images.filter(img => !keptImageIds.includes(img._id.toString()));
+    await deleteImages(imagesToDelete);
+
+    const existingImages = post.images.filter(img => keptImageIds.includes(img._id.toString()));
+
+    const newFiles = req.files || [];
+
+    const uploadedImages = newFiles.length > 0 
+    ? await uploadImages(newFiles)
+    : [];
+
+    post.images = [...existingImages, ...uploadedImages];
+
+    await post.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Post updated successfully."
+    })
+  } catch(err){
+    console.error("Error in updatePost: ", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    })
+  }
+}
 
 export const deletePost = async (req, res) => {}
 

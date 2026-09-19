@@ -28,15 +28,34 @@ const postschema = new mongoose.Schema({
       type: [Number],
     },
   },
-  images: [String],
+  images: {
+    type: [
+      {
+        imageUrl: {
+          type: String,
+          required: true
+        },
+        publicId: {
+          type: String,
+          required: true
+        }
+      }
+    ],
+  required: true
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
+    ref: "User",
+    required: true
   },
   views: {
     type: Number
   }
-});
+},
+{
+  timestamps: true
+}
+);
 
 postschema.index({ location: "2dsphere" });
 
