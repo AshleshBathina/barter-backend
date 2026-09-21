@@ -77,11 +77,10 @@ export const createPost = async (req, res) => {
       message: "Post created successfully."
     })
   } catch(e){
-    console.log(e);
+    console.error("Error in createPost: ", e);
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: e.message
     })
   }
 }
@@ -210,6 +209,7 @@ export const deletePost = async (req, res) => {
       message: "Post deleted successfully."
     })
   } catch(err){
+    console.error("Error in deletePost: ", err);
     res.status(500).json({
       success: false,
       message: "Internal Server Error."
@@ -217,7 +217,20 @@ export const deletePost = async (req, res) => {
   }
 }
 
-export const getPosts = async (req, res) => {}
+export const getPosts = async (req, res) => {
+  try{
+    
+
+  } catch(err){
+    console.error("Error in getPosts: ", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error."
+    })
+  }
+
+
+}
 
 export const getPostById = async (req, res) => {
   try{
@@ -248,6 +261,7 @@ export const getPostById = async (req, res) => {
       data: post
     })
   } catch(err){
+    console.error("Error in getPostById: ", err);
     res.status(500).json({
       success: false,
       message: "Internal server error."
