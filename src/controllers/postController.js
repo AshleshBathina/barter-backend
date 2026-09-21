@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Post from "../models/postModel.js"
 import { uploadImages, deleteImages } from "../services/imageService.js"
 import { validateCoordinates } from "../utils/validateCoordinates.js"
@@ -89,13 +90,19 @@ export const updatePost = async (req, res) => {
   try{
     const { id } = req.params;
     const { title, type, description, inExchangeFor, longitude, latitude} = req.body;
-
     const keptImageIds = JSON.parse(req.body.keptImageIds || "[]");
+
+    if(!mongoose.Types.ObjectId.isValid(id)){
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID."
+      })
+    }
 
     const post = await Post.findOne({
       _id: id,
       author: req.user._id
-    });
+    }).select("+images.publicId");
 
     if(!post){
       return res.status(404).json({
@@ -169,9 +176,82 @@ export const updatePost = async (req, res) => {
   }
 }
 
-export const deletePost = async (req, res) => {}
+export const deletePost = async (req, res) => {
+  try{
+    const {id} = req.params;
+
+    if(!mongoose.Types.ObjectId.isValid(id)){
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID."
+      })
+    }
+
+    const post = await Post.findOne({
+      _id: id,
+      author: req?.user?._id
+    }).select("+images.publicId");
+
+    if(!post){
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      })
+    }
+
+    if(post.images?.length > 0){
+      await deleteImages(post.images);
+    }
+
+    await Post.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Post deleted successfully."
+    })
+  } catch(err){
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error."
+    })
+  }
+}
 
 export const getPosts = async (req, res) => {}
 
-export const getPostById = async (req, res) => {}
+export const getPostById = async (req, res) => {
+  try{
+    const {id} = req.params;
+
+    if(!mongoose.Types.ObjectId.isValid(id)){
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID."
+      });
+    }
+
+    const post = await Post.findOne({
+      _id: id,
+      author: req.user?._id
+    });
+
+    if(!post){
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Post found.",
+      data: post
+    })
+  } catch(err){
+    res.status(500).json({
+      success: false,
+      message: "Internal server error."
+    });
+  }
+}
 
